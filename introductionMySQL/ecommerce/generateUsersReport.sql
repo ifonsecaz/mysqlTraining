@@ -1,3 +1,9 @@
+/*
+Generates a report of active users within a specified date range, 
+including their total orders, total amount spent, total reviews, and the date of their last order. 
+The results are sorted by total amount spent (descending) and total orders (descending), 
+and the number of results is limited by the specified limit.
+*/
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateActiveUsersReport`(
     IN p_start_date DATE,
     IN p_end_date DATE,

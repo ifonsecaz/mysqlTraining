@@ -1,7 +1,17 @@
+#Database Creation
 create database ecommerceplatform;
 
 use ecommerceplatform;
 
+/*
+Table Definitions:
+    Users (user_id, username, email, password, role)
+    Products (product_id, product_name, category, price, stock_quantity)
+    Orders (order_id, user_id, order_date, total_amount, order_status)
+    OrderDetails (order_detail_id, order_id, product_id, quantity, unit_price)
+    Payments (payment_id, order_id, payment_date, payment_method, amount)
+    Reviews (review_id, product_id, user_id, review_text, rating, review_date)
+*/
 create table users(
  user_id int primary key,
  username varchar(50),
@@ -56,6 +66,8 @@ create table reviews(
     foreign key (product_id) references products (product_id),
     foreign key (user_id) references users (user_id)
 );
+
+#Data Insertion: Populates the tables
 
 INSERT INTO users (user_id, username, email, password, role) VALUES
 (1, 'john_doe', 'john.doe@example.com', 'password123', 'customer'),
@@ -131,41 +143,49 @@ INSERT INTO reviews (review_id, product_id, user_id, review_text, rating, review
 (10, 107, 5, 'Nice design but could be brighter', 3, '2023-10-26');
 
 #3
+# Retrieves products in the "Electronics" category.
 select * from products where category ='Electronics';
 
+# Retrieves user details for a specific user_id, in this case 5.
 select * from users where user_id=5;
 
+# Lists orders placed by a specific user
 select orders.* from orders
 inner join users on users.user_id=orders.user_id
 where users.user_id=1;
 
+# Retrieves order details for a specific order ID
 select  ordedetails.order_detail_id, products.product_id, products.product_name, products.category, products.price, ordedetails.quantity
 from ordedetails 
 inner join products on ordedetails.product_id=products.product_id
 where  ordedetails.order_id=1008;
 
+# Calculates the average rating for a specific product
 select avg(reviews.rating), products.product_name
 from products
 inner join reviews on reviews.product_id=products.product_id
 where reviews.product_id=101;
 
+# Calculates the average rating for all products grouped by product name
 select avg(reviews.rating), products.product_name
 from products
 inner join reviews on reviews.product_id=products.product_id
 group by products.product_name;
 
+# Sums up payments made in October 2023
 select sum(amount) 
 from payments
 where month(payment_date) = 10 AND year(payment_date)= 2023;
 
 #5
+#Identify the top 5 selling products, based on quantity sold.
 select product_id, sum(quantity)
 from ordedetails 
 group by product_id
 order by sum(quantity) desc 
 limit 5;
 
-#Identify the top-selling products.
+#Identify the top 5 selling products, based on quantity sold, adds details.
 select products.product_id, products.product_name, products.category, products.price
 from products
 inner join ordedetails on ordedetails.product_id=products.product_id
@@ -174,12 +194,14 @@ order by sum(ordedetails.quantity) desc
 limit 5;
 
 #Individual orders
+# Identifies users who placed orders with a total amount exceeding $100.
 select distinct users.username
 from users
 inner join orders on orders.user_id=users.user_id
 where orders.total_amount>=100;
 
 #Total spend
+# Calculates the total spending of users and filters those who spent more than $300.
 select distinct users.username, sum(orders.total_amount)
 from users
 inner join orders on orders.user_id=users.user_id
@@ -206,6 +228,7 @@ VALUES (17, 1011, 104, 1, (SELECT price FROM products WHERE product_id = 104));
 INSERT INTO ordedetails (order_detail_id, order_id, product_id, quantity, unit_price)
 VALUES (18, 1011, 106, 2, (SELECT price FROM products WHERE product_id = 106));
 
+#Update stock quantity
 UPDATE products 
 SET stock_quantity = stock_quantity - 1
 WHERE product_id = 104;
@@ -214,14 +237,16 @@ UPDATE products
 SET stock_quantity = stock_quantity - 2 
 WHERE product_id = 104;
 
+#Delete a review
 delete from reviews
 where review_id =10;
 
-
+#Update status of order with a stored procedure
 CALL UpdateOrderStatus(1006);
 
 select *
 from orders
 where orders.order_id=1006;
 
+#Generates a report for active users, using a stored procedure
 CALL GenerateActiveUsersReport('2023-10-01', '2023-10-31', 5);

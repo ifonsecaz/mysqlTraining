@@ -1,3 +1,6 @@
+/*
+Trigger executed afte insesting a payment, to call UpdateOrderStatus with the order_id 
+*/
 USE ecommerceplatform
 
 DELIMITER //
